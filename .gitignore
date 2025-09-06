@@ -1,0 +1,39 @@
+# 忽略构建、临时和用户文件
+build/
+*.user
+*.o
+*.obj
+*.exe
+*.dll
+*.so
+*.dylib
+*.log
+*.tmp
+*.cache
+*.swp
+*.swo
+*.db
+*.pyc
+__pycache__/
+# 忽略CMake生成文件
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+Makefile
+*.cmake
+# 忽略VS Code和Qt Creator配置
+.vscode/
+*.pro.user
+*.qbs.user
+*.qbs.user.*
+*.pro.user.*
+*.autosave
+# 只上传代码和图片
+!*.cpp
+!*.h
+!*.ui
+!*.md
+!background/*.jpg
+!examples/*.jpg
+
+CMakeLists.txt.user

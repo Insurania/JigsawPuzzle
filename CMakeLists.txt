@@ -16,44 +16,45 @@ find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets)
 
 set(PROJECT_SOURCES
         main.cpp
-        mainwindow.cpp
-        mainwindow.h
-        mainwindow.ui
 
-        backgrounds.qrc
+        # Core game logic
+        core/jigsaw_types.h
+        core/puzzle_game.h
+        core/puzzle_game.cpp
+        core/puzzle_grid.h
+        core/puzzle_grid.cpp
 
-        Jigsaw.h
+        # Puzzle components
+        components/puzzle_piece.h
+        components/puzzle_piece.cpp
+        components/puzzle_path.h
+        components/puzzle_path.cpp
+        components/custom_puzzle_path.h
+        components/custom_puzzle_path.cpp
 
-        custommenuwidget.h
-        custommenuwidget.cpp
+        # UI components
+        ui/puzzle_button.h
+        ui/puzzle_button.cpp
+        ui/puzzle_label.h
+        ui/puzzle_label.cpp
+        ui/puzzle_slider.h
+        ui/puzzle_slider.cpp
+        ui/game_menu.h
+        ui/game_menu.cpp
+        ui/main_window.h
+        ui/main_window.cpp
+        ui/main_window.ui
 
-        jigsawpath.h
-        jigsawpath.cpp
-        customjigsawpath.h
-        customjigsawpath.cpp
+        # Tools and editors
+        tools/path_creator.h
+        tools/path_creator.cpp
+        tools/creator_canvas.h
+        tools/creator_canvas.cpp
+        tools/image_effects.h
+        tools/image_effects.cpp
 
-        puzzlegrid.h
-        puzzlegrid.cpp
-
-        puzzlewidget.h
-        puzzlewidget.cpp
-
-        jigsawbutton.cpp
-        jigsawbutton.h
-        jigsawlabel.cpp
-        jigsawlabel.h
-        jigsawpiece.cpp
-        jigsawpiece.h
-        jigsawslider.cpp
-        jigsawslider.h
-
-        imageeffect.h
-        imageeffect.cpp
-
-        customjigsawpathcreator.h
-        customjigsawpathcreator.cpp
-        creatorcanvas.cpp
-        creatorcanvas.h
+        # Resources
+        resources/backgrounds.qrc
 
         README.md
 )

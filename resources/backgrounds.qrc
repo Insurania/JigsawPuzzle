@@ -1,0 +1,14 @@
+<RCC>
+    <qresource prefix="/backgrounds">
+        <file alias="back1">backgrounds/pattern-g0176f350a_1920.jpg</file>
+        <file alias="back2">backgrounds/wooden-gf8ceb8baf_1920.jpg</file>
+        <file alias="back3">backgrounds/wood-g090b35b52_1920.jpg</file>
+    </qresource>
+    <qresource prefix="/examples">
+        <file alias="ex1">example_images/babybeardeddragon.jpg</file>
+    <file alias="ex2">example_images/babypudu.jpg</file>
+    <file alias="ex3">example_images/colorfulplant.jpg</file>
+    <file alias="ex4">example_images/ilmpark.jpg</file>
+    <file alias="ex0">example_images/cars.jpg</file>
+    </qresource>
+</RCC>
