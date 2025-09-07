@@ -18,11 +18,13 @@ class GameMenu : public QWidget
 private:
     PuzzleButton* m_newPuzzleButton;
     PuzzleButton* m_quitButton;
+    PuzzleButton* m_saveButton;
 public:
     explicit GameMenu(QSize size, QWidget *parent = nullptr);
 
     PuzzleButton *newPuzzleButton() const;
     PuzzleButton *quitButton() const;
+    PuzzleButton *saveButton() const;
 
 signals:
     void enterMenu();

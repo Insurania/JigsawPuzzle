@@ -57,11 +57,11 @@ struct Parameters {
     int widthWidgetCaption = innerWidth;
     int widthWidgetEx = innerWidth;
     int widthWidgetOpenFile = innerWidth;
-    int widthWidgetPuzzlePiece = innerWidth * 2 / 3;
-    int widthWidgetNumberOfPieces = innerWidth / 3;
+    int widthWidgetPuzzlePiece = innerWidth; // 让拼图形状占满整行，实现居中效果
+    int widthWidgetNumberOfPieces = innerWidth;
     int widthWidgetButtons = innerWidth;
 
-    int heightWidgetCaption = innerHeight / 6;
+    int heightWidgetCaption = 0; // 删除标题，高度设为0
     int heightWidgetEx = innerHeight / 4;
     int heightWidgetOpenFile = innerHeight / 12;
     int heightWidgetPuzzlePiece = innerHeight / 4;
@@ -74,8 +74,8 @@ struct Parameters {
     QPoint positionWidgetEx = QPoint(0, heightWidgetCaption);
     QPoint positionWidgetOpenFile = QPoint(0, heightWidgetCaption + heightWidgetEx);
     QPoint positionWidgetPuzzlePiece = QPoint(0, heightWidgetCaption + heightWidgetEx + heightWidgetOpenFile);
-    QPoint positionWidgetNumberOfPieces = QPoint(widthWidgetPuzzlePiece, heightWidgetCaption + heightWidgetEx + heightWidgetOpenFile);
-    QPoint positionWidgetButtons = QPoint(0, heightWidgetCaption + heightWidgetEx + heightWidgetOpenFile + heightWidgetPuzzlePiece);
+    QPoint positionWidgetNumberOfPieces = QPoint(0, heightWidgetCaption + heightWidgetEx + heightWidgetOpenFile + heightWidgetPuzzlePiece);
+    QPoint positionWidgetButtons = QPoint(0, heightWidgetCaption + heightWidgetEx + heightWidgetOpenFile + heightWidgetPuzzlePiece + heightWidgetNumberOfPieces);
     QPoint positionFreeArea = freeAreaAlignment == 0 ? QPoint((screenWidth - freeAreaWidth) / 2, (screenHeight - freeAreaHeight) / 2)
                             : freeAreaAlignment == 1 ? QPoint(0, (screenHeight - freeAreaHeight) / 2)
                                                      : QPoint((screenWidth - freeAreaWidth), (screenHeight - freeAreaHeight) / 2);

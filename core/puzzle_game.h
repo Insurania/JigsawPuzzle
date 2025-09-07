@@ -10,24 +10,14 @@
 #include "ui/puzzle_button.h"
 #include "ui/puzzle_slider.h"
 #include "tools/image_effects.h"
+#include "save_system.h"
+#include "ui/save_manager.h"
 #include <QRadioButton>
 #include <QCheckBox>
 #include <QWidget>
 #include <QTimer>
 #include <QPainterPath>
 #include <QLabel>
-
-// @Julia: Das ist die Hauptklasse. Ignoriere das struct und scrolle runter bis zur class PuzzleWidget. Viel Spaß!
-
-
-
-/*
- * The PuzzleWidget class is the core of the jigsaw puzzle game. You can load your own image or choose one of
- * the examples to turn it into a jigsaw puzzle. You can choose the shape and the number of your pieces and
- * whether you want them to be rotatable or not. In the GUI, the pieces can be dragged (or rotated) by clicking
- * them. When you put two pieces close enough together, they are merged and will be dragged (or rotated) together
- * from here on. The game is finished, when all pieces are merged.
- */
 
 class PuzzleGame : public QWidget
 {
@@ -133,6 +123,15 @@ private:
     void startGameTimer();
     void stopGameTimer();
     void resetGameStats();
+    
+    // 存档系统相关
+    SaveSystem* m_saveSystem;
+    SaveManager* m_saveManager;
+    
+    void setupSaveSystem();
+    GameSaveData createCurrentGameData();
+    void loadGameFromData(const GameSaveData& gameData);
+    void showSaveManager();
 
 public:
     explicit PuzzleGame(QWidget *parent = nullptr);

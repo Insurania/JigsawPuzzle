@@ -100,17 +100,10 @@ void PuzzlePiece::setAngle(int newAngle)
     emit rotated(m_id, m_angle, mapToParent(m_maxRectForRotation.center() - m_maxRectForRotation.topLeft()));
 }
 
-/*
- * If you use this function without the constDistance and constOriginalAngle values, it gets very unprecise. The
- * JigsawPiece you rotate around the given point will subsequently move away from the position it should be moved
- * to. The more often the function is called, the larger this deviation becomes.
- */
+
 
 void PuzzlePiece::rotateAroundPoint(int angle, const QPointF &point, double constDistance, double constOriginalAngle)
 {
-    //Case 1: No original angle was set
-    //Case 2: Original angle was set, but no valid distance was set
-
     if (constOriginalAngle <= -360.0 || constDistance <= 0.0) {
         int angleDif = m_angle - angle;
         m_angle = angle;
@@ -123,7 +116,6 @@ void PuzzlePiece::rotateAroundPoint(int angle, const QPointF &point, double cons
         if (angle == 0) emit requestPositionValidation(m_id);
     }
 
-    //Case 3: Original angle was set and valid distance was set
 
     else {
         double newAngleForLine = constOriginalAngle + angle;

@@ -23,6 +23,8 @@ set(PROJECT_SOURCES
         core/puzzle_game.cpp
         core/puzzle_grid.h
         core/puzzle_grid.cpp
+        core/save_system.h
+        core/save_system.cpp
 
         # Puzzle components
         components/puzzle_piece.h
@@ -41,6 +43,8 @@ set(PROJECT_SOURCES
         ui/puzzle_slider.cpp
         ui/game_menu.h
         ui/game_menu.cpp
+        ui/save_manager.h
+        ui/save_manager.cpp
         ui/main_window.h
         ui/main_window.cpp
         ui/main_window.ui

@@ -269,19 +269,11 @@ void PuzzleGame::setMenuWidget()
     m_menuWidget->setGeometry(QRect(QPoint(xPos, yPos), menuSize));
     m_menuWidget->raise();
 
-    // 不再需要定时器和动画效果
-    // m_moveMenuInTimer = new QTimer(this);
-    // m_moveMenuOutTimer = new QTimer(this);
 
-    // QObject::connect(m_moveMenuInTimer, &QTimer::timeout, this, &PuzzleGame::moveMenuInTimerTimeout);
-    // QObject::connect(m_moveMenuOutTimer, &QTimer::timeout, this, &PuzzleGame::moveMenuOutTimerTimeout);
-
-    // 不再需要鼠标进入离开事件
-    // QObject::connect(m_menuWidget, &GameMenu::enterMenu, this, &PuzzleGame::enterMenu);
-    // QObject::connect(m_menuWidget, &GameMenu::leaveMenu, this, &PuzzleGame::leaveMenu);
 
     QObject::connect(m_menuWidget->newPuzzleButton(), &PuzzleButton::clicked, this, &PuzzleGame::menuNewButtonClicked);
     QObject::connect(m_menuWidget->quitButton(), &PuzzleButton::clicked, this, &PuzzleGame::menuQuitButtonClicked);
+    QObject::connect(m_menuWidget->saveButton(), &PuzzleButton::clicked, this, &PuzzleGame::showSaveManager);
 }
 
 void PuzzleGame::setQuitWidget()
@@ -311,14 +303,14 @@ void PuzzleGame::setQuitWidget()
     m_quitWidget = new QWidget(this);
     m_quitWidget->setGeometry(QRect(positionWidget, sizeOuterBoundsBackground));
 
-    QPainterPath backgroundLabelPath = PuzzlePath::singleJigsawPiecePath(QRect(QPoint(0, 0), sizeOuterBoundsBackground), innerBoundsBackground, Jigsaw::TypeOfPiece::STANDARD);
+    QPainterPath backgroundLabelPath = PuzzlePath::singleJigsawPiecePath(QRect(QPoint(0, 0), sizeOuterBoundsBackground), innerBoundsBackground, Jigsaw::TypeOfPiece::TRAPEZOID);
     PuzzleLabel* backgroundLabel = new PuzzleLabel(sizeOuterBoundsBackground, QBrush(QPixmap(":/backgrounds/back3")), backgroundLabelPath,
                                                    m_quitWidget, "您确定要退出吗?", innerBoundsBackground);
     backgroundLabel->setAlignment(Qt::AlignTop|Qt::AlignHCenter);
     backgroundLabel->setFont(m_parameters.mainFont);
 
-    QPainterPath backgroundYesButtonPath = PuzzlePath::singleJigsawPiecePath(QRect(QPoint(0, 0), sizeOuterBoundsButtons), QRect(), Jigsaw::TypeOfPiece::STANDARD, 4, true);
-    QPainterPath backgroundNoButtonPath = PuzzlePath::singleJigsawPiecePath(QRect(QPoint(0, 0), sizeOuterBoundsButtons), QRect(), Jigsaw::TypeOfPiece::STANDARD, 4, true);
+    QPainterPath backgroundYesButtonPath = PuzzlePath::singleJigsawPiecePath(QRect(QPoint(0, 0), sizeOuterBoundsButtons), QRect(), Jigsaw::TypeOfPiece::TRAPEZOID, 4, true);
+    QPainterPath backgroundNoButtonPath = PuzzlePath::singleJigsawPiecePath(QRect(QPoint(0, 0), sizeOuterBoundsButtons), QRect(), Jigsaw::TypeOfPiece::TRAPEZOID, 4, true);
 
     PuzzleButton* yesButton = new PuzzleButton(sizeOuterBoundsButtons, QBrush(QPixmap(":/backgrounds/back2")), backgroundYesButtonPath, m_quitWidget, "是");
     yesButton->move(innerBoundsBackground.left() + 10, innerBoundsBackground.bottom() - 10 - yesButton->height());
@@ -357,9 +349,9 @@ void PuzzleGame::setNewWidget()
     
     m_newWidget->setGeometry(QRect(QPoint(xPos, yPos), widgetSize));
 
-    QPainterPath backgroundLabelPath = PuzzlePath::singleJigsawPiecePath(m_parameters.rectWidget, m_parameters.rectWidgetArea, Jigsaw::TypeOfPiece::STANDARD);
+    QPainterPath backgroundLabelPath = PuzzlePath::singleJigsawPiecePath(m_parameters.rectWidget, m_parameters.rectWidgetArea, Jigsaw::TypeOfPiece::TRAPEZOID);
     PuzzleLabel* backgroundLabel = new PuzzleLabel(m_parameters.sizeWidget, QBrush(QPixmap(":/backgrounds/back3")), backgroundLabelPath, m_newWidget,
-                                                   "创建新拼图!", m_parameters.rectWidgetArea);
+                                                   "", m_parameters.rectWidgetArea);
     backgroundLabel->setAlignment(Qt::AlignTop|Qt::AlignHCenter);
     backgroundLabel->setFont(m_parameters.mainFont);
 
@@ -456,8 +448,11 @@ void PuzzleGame::setNewWidgetPuzzlePieceWidget(QWidget *parent, const Jigsaw::Pa
     QGroupBox* radioGroupBoxPuzzlePiece = new QGroupBox(widgetPuzzlePiece);
     radioGroupBoxPuzzlePiece->setGeometry(QRect(QPoint(0, 0), par.sizeWidgetPuzzlePiece));
     QVector<PuzzleButton*> labelPuzzlePiece;
-    int numberOfTypes = static_cast<int>(Jigsaw::TypeOfPiece::count);
-    int maxLabelPuzzlePieceWidth = numberOfTypes != 0 ? (par.widthWidgetPuzzlePiece - (numberOfTypes + 1) * par.minBorderWidth) / numberOfTypes : 0;
+    int numberOfTypes = static_cast<int>(Jigsaw::TypeOfPiece::count) - 1; // 排除CUSTOM类型
+    int visibleTypes = 2; // 只显示前两种形状：TRAPEZOID和SIMPLEARC
+    // 让两个按钮挨着显示，减少间距
+    int smallSpacing = 10; // 使用较小的间距
+    int maxLabelPuzzlePieceWidth = visibleTypes != 0 ? (par.widthWidgetPuzzlePiece - par.minBorderWidth * 2 - smallSpacing) / visibleTypes : 0;
     int maxLabelPuzzlePieceHeight = par.heightWidgetPuzzlePiece - par.minBorderWidth * 2 - par.minRadioButtonHeight;
     int labelPuzzlePieceWidth, labelPuzzlePieceHeight;
     if (maxLabelPuzzlePieceHeight > maxLabelPuzzlePieceWidth) {
@@ -471,9 +466,11 @@ void PuzzleGame::setNewWidgetPuzzlePieceWidget(QWidget *parent, const Jigsaw::Pa
     bool noPreviewPuzzlePiece = labelPuzzlePieceWidth < par.minLabelPuzzlePieceWidth || labelPuzzlePieceHeight < par.minLabelPuzzlePieceHeight;
     QSize sizeLabelPuzzlePiece(labelPuzzlePieceWidth, labelPuzzlePieceHeight);
 
-    int borderPuzzlePieceWidth = numberOfTypes != 1 ? (par.widthWidgetPuzzlePiece - par.minBorderWidth * 2 - (numberOfTypes) * labelPuzzlePieceWidth) / (numberOfTypes - 1) : 0;
+    int borderPuzzlePieceWidth = smallSpacing; // 使用固定的小间距
     int borderPuzzlePieceHeight = (par.heightWidgetPuzzlePiece - par.minBorderWidth * 2 - labelPuzzlePieceHeight - par.minRadioButtonHeight) / 2;
 
+    // 只显示前两种形状，但创建所有形状的代码
+    
     for (int i = 0; i < numberOfTypes; ++i) {
         labelPuzzlePiece.push_back(new PuzzleButton(widgetPuzzlePiece));
         if (noPreviewPuzzlePiece) {
@@ -484,24 +481,51 @@ void PuzzleGame::setNewWidgetPuzzlePieceWidget(QWidget *parent, const Jigsaw::Pa
             labelPuzzlePiece[i]->setJigsawPath(path, sizeLabelPuzzlePiece, QBrush(Qt::lightGray));
             labelPuzzlePiece[i]->animate();
         }
-        QPoint labelPositionPuzzlePiece(par.minBorderWidth + i * labelPuzzlePieceWidth + i * borderPuzzlePieceWidth, par.minBorderWidth + borderPuzzlePieceHeight);
-        labelPuzzlePiece[i]->move(labelPositionPuzzlePiece);
-        labelPuzzlePiece[i]->setToolTip(PuzzlePath::tooltip(PuzzlePath::intToTypeOfPiece(i)));
+        
+        // 只对前两种形状设置位置和显示
+        if (i < visibleTypes) {
+            // 计算居中位置，让两个按钮紧凑地显示在中间
+            int totalWidth = visibleTypes * labelPuzzlePieceWidth + (visibleTypes - 1) * borderPuzzlePieceWidth;
+            int startX = (par.widthWidgetPuzzlePiece - totalWidth) / 2;
+            QPoint labelPositionPuzzlePiece(startX + i * (labelPuzzlePieceWidth + borderPuzzlePieceWidth), par.minBorderWidth + borderPuzzlePieceHeight);
+            labelPuzzlePiece[i]->move(labelPositionPuzzlePiece);
+            labelPuzzlePiece[i]->setToolTip(PuzzlePath::tooltip(PuzzlePath::intToTypeOfPiece(i)));
+            labelPuzzlePiece[i]->show(); // 确保前两种形状可见
+        } else {
+            // 隐藏后面的形状，但保留代码
+            labelPuzzlePiece[i]->hide();
+        }
 
         m_radioButtonPuzzlePiece.push_back(new QRadioButton(radioGroupBoxPuzzlePiece));
-        QPoint radioPositionPuzzlePiece = labelPositionPuzzlePiece + QPoint(labelPuzzlePieceWidth / 2 - 10, labelPuzzlePieceHeight + borderPuzzlePieceHeight);
-        m_radioButtonPuzzlePiece[i]->move(radioPositionPuzzlePiece);
+        
+        if (i < visibleTypes) {
+            // 计算居中位置，让两个单选按钮紧凑地显示在中间
+            int totalWidth = visibleTypes * labelPuzzlePieceWidth + (visibleTypes - 1) * borderPuzzlePieceWidth;
+            int startX = (par.widthWidgetPuzzlePiece - totalWidth) / 2;
+            QPoint radioPositionPuzzlePiece = QPoint(startX + i * (labelPuzzlePieceWidth + borderPuzzlePieceWidth), par.minBorderWidth + borderPuzzlePieceHeight) + QPoint(labelPuzzlePieceWidth / 2 - 10, labelPuzzlePieceHeight + borderPuzzlePieceHeight);
+            m_radioButtonPuzzlePiece[i]->move(radioPositionPuzzlePiece);
+            m_radioButtonPuzzlePiece[i]->show(); // 确保前两种形状的单选按钮可见
+        } else {
+            // 隐藏后面的单选按钮，但保留代码
+            m_radioButtonPuzzlePiece[i]->hide();
+        }
 
         QObject::connect(labelPuzzlePiece[i], &PuzzleButton::clicked, m_radioButtonPuzzlePiece[i], &QRadioButton::toggle);
     }
-    m_radioButtonPuzzlePiece[PuzzlePath::typeOfPieceToInt(Jigsaw::TypeOfPiece::STANDARD)]->setChecked(true);
+    m_radioButtonPuzzlePiece[PuzzlePath::typeOfPieceToInt(Jigsaw::TypeOfPiece::TRAPEZOID)]->setChecked(true);
     m_ownShapeLabel = labelPuzzlePiece.last();
-    QObject::connect(labelPuzzlePiece.last(), &PuzzleButton::clicked, m_createOwnShapeWidget, &QWidget::show);
-    QObject::connect(labelPuzzlePiece.last(), &PuzzleButton::clicked, m_createOwnShapeWidget, &QWidget::raise);
-    QFont font("Georgia", 32, QFont::Bold);
-    labelPuzzlePiece.last()->setText("?");
-    labelPuzzlePiece.last()->setTextArea(labelPuzzlePiece.last()->rect());
-    labelPuzzlePiece.last()->setFont(font);
+    // 隐藏自定义形状按钮
+    m_ownShapeLabel->hide();
+    // 隐藏对应的单选按钮
+    m_radioButtonPuzzlePiece.last()->hide();
+    
+    // 注释掉原有的连接和设置
+    // QObject::connect(labelPuzzlePiece.last(), &PuzzleButton::clicked, m_createOwnShapeWidget, &QWidget::show);
+    // QObject::connect(labelPuzzlePiece.last(), &PuzzleButton::clicked, m_createOwnShapeWidget, &QWidget::raise);
+    // QFont font("Georgia", 32, QFont::Bold);
+    // labelPuzzlePiece.last()->setText("?");
+    // labelPuzzlePiece.last()->setTextArea(labelPuzzlePiece.last()->rect());
+    // labelPuzzlePiece.last()->setFont(font);
 }
 
 void PuzzleGame::setNewWidgetNumberOfPiecesWidget(QWidget *parent, const Jigsaw::Parameters &par)
@@ -517,7 +541,7 @@ void PuzzleGame::setNewWidgetNumberOfPiecesWidget(QWidget *parent, const Jigsaw:
     m_rotationAllowedCheckBox->setFont(m_parameters.mainFont);
     m_rotationAllowedCheckBox->setGeometry(QRect(QPoint(par.minBorderWidth + par.widthWidgetNumberOfPieces / 2, par.minBorderWidth), QSize(par.widthWidgetNumberOfPieces / 2 - par.minBorderWidth * 2, par.heightWidgetNumberOfPieces / 4 - par.minBorderWidth * 2)));
 
-    QPainterPath path = PuzzlePath::singleJigsawPiecePath(QRect(QPoint(0, 0), par.sizeButtonOuterBounds), QRect(), Jigsaw::TypeOfPiece::STANDARD, 4, true);
+    QPainterPath path = PuzzlePath::singleJigsawPiecePath(QRect(QPoint(0, 0), par.sizeButtonOuterBounds), QRect(), Jigsaw::TypeOfPiece::TRAPEZOID, 4, true);
 
     m_sliderButton = new PuzzleSlider(par.sizeButtonOuterBounds, QBrush(QPixmap(":/backgrounds/back2")), path, QBrush(QPixmap(":/backgrounds/back1")), widgetNumberOfPieces, 10, 10, 50);
     m_sliderButton->setGeometry(QRect(QPoint(0, caption->height() + par.minBorderWidth), QSize(par.widthWidgetNumberOfPieces - par.minBorderWidth * 4, par.heightWidgetNumberOfPieces / 8)));
@@ -532,8 +556,8 @@ void PuzzleGame::setNewWidgetButtonsWidget(QWidget *parent, const Jigsaw::Parame
 
     QSize sizeButtonOuterBounds(120, 120);
 
-    QPainterPath pathOkButton = PuzzlePath::singleJigsawPiecePath(QRect(QPoint(0, 0), sizeButtonOuterBounds), QRect(), Jigsaw::TypeOfPiece::STANDARD, 4, true);
-    QPainterPath pathCancelButton = PuzzlePath::singleJigsawPiecePath(QRect(QPoint(0, 0), sizeButtonOuterBounds), QRect(), Jigsaw::TypeOfPiece::STANDARD, 4, true);
+    QPainterPath pathOkButton = PuzzlePath::singleJigsawPiecePath(QRect(QPoint(0, 0), sizeButtonOuterBounds), QRect(), Jigsaw::TypeOfPiece::TRAPEZOID, 4, true);
+    QPainterPath pathCancelButton = PuzzlePath::singleJigsawPiecePath(QRect(QPoint(0, 0), sizeButtonOuterBounds), QRect(), Jigsaw::TypeOfPiece::TRAPEZOID, 4, true);
 
     PuzzleButton* okButton = new PuzzleButton(sizeButtonOuterBounds, QBrush(QPixmap(":/backgrounds/back2")), pathOkButton, widgetButtons, "确定");
     okButton->animate();
@@ -577,12 +601,12 @@ void PuzzleGame::setWonWidget()
     m_wonWidget = new QWidget(this);
     m_wonWidget->setGeometry(QRect(positionWidget, sizeOuterBoundsBackground));
 
-    QPainterPath pathBackgroundLabel = PuzzlePath::singleJigsawPiecePath(QRect(QPoint(0, 0), sizeOuterBoundsBackground), QRect(), Jigsaw::TypeOfPiece::STANDARD, 4, true);
+    QPainterPath pathBackgroundLabel = PuzzlePath::singleJigsawPiecePath(QRect(QPoint(0, 0), sizeOuterBoundsBackground), QRect(), Jigsaw::TypeOfPiece::TRAPEZOID, 4, true);
     PuzzleLabel* backgroundLabel = new PuzzleLabel(sizeOuterBoundsBackground, QBrush(QPixmap(":/backgrounds/back3")), pathBackgroundLabel, m_wonWidget, "恭喜您赢了!!!", innerBoundsBackground);
     backgroundLabel->setAlignment(Qt::AlignTop|Qt::AlignHCenter);
     backgroundLabel->setFont(m_parameters.mainFont);
 
-    QPainterPath pathOkButton = PuzzlePath::singleJigsawPiecePath(QRect(QPoint(0, 0), sizeOuterBoundsButtons), QRect(), Jigsaw::TypeOfPiece::STANDARD, 4, true);
+    QPainterPath pathOkButton = PuzzlePath::singleJigsawPiecePath(QRect(QPoint(0, 0), sizeOuterBoundsButtons), QRect(), Jigsaw::TypeOfPiece::TRAPEZOID, 4, true);
     PuzzleButton* okButton = new PuzzleButton(sizeOuterBoundsButtons, QBrush(QPixmap(":/backgrounds/back2")), pathOkButton, m_wonWidget, "确定");
     okButton->move(innerBoundsBackground.center() + QPoint(-okButton->width() / 2, okButton->height() / 2));
     okButton->setFont(m_parameters.mainFont);
@@ -662,6 +686,7 @@ PuzzleGame::PuzzleGame(QWidget *parent)
     setNewWidget();
     setQuitWidget();
     setWonWidget();
+    setupSaveSystem();
 }
 
 void PuzzleGame::loadImage(const QPixmap &image)
@@ -736,7 +761,10 @@ void PuzzleGame::newWidgetOkClicked()
     if (!m_radioButtonEx.last()->isChecked()) {
         QPixmap image;
         for (int i = 0; i < m_radioButtonEx.size(); ++i) {
-            if (m_radioButtonEx[i]->isChecked()) image = QPixmap(":/examples/ex" + QString::number(i));
+            if (m_radioButtonEx[i]->isChecked()) {
+                image = QPixmap(":/examples/ex" + QString::number(i));
+                m_filename = ":/examples/ex" + QString::number(i); // 设置文件名
+            }
         }
         loadImage(image);
     }
@@ -911,4 +939,263 @@ void PuzzleGame::resetGameStats()
     m_gameStarted = false;  // 重置游戏开始标志
     updateTimeDisplay();
     updateMovesDisplay();
+}
+
+// 存档系统实现
+void PuzzleGame::setupSaveSystem()
+{
+    m_saveSystem = new SaveSystem(this);
+    m_saveManager = new SaveManager(this);
+    
+    // 连接存档管理器的信号
+    connect(m_saveManager, &SaveManager::saveRequested, this, [this](const GameSaveData& gameData, const QString& saveName) {
+        if (m_saveSystem->saveGame(gameData, saveName)) {
+            m_saveManager->hide();
+        }
+    });
+    
+    connect(m_saveManager, &SaveManager::loadRequested, this, [this](const QString& saveName) {
+        GameSaveData gameData = m_saveSystem->loadGame(saveName);
+        if (!gameData.saveName.isEmpty()) {
+            loadGameFromData(gameData);
+            m_saveManager->hide();
+        }
+    });
+    
+    connect(m_saveManager, &SaveManager::closeRequested, this, [this]() {
+        m_saveManager->hide();
+    });
+    
+    // 确保存档管理器初始时隐藏
+    m_saveManager->hide();
+    
+    // 设置存档管理器为模态窗口
+    m_saveManager->setWindowModality(Qt::ApplicationModal);
+    
+    // 设置存档管理器为独立窗口
+    m_saveManager->setWindowFlags(Qt::Window | Qt::WindowStaysOnTopHint);
+    
+    // 设置存档管理器标题
+    m_saveManager->setWindowTitle("存档管理");
+    
+    // 设置存档管理器大小
+    m_saveManager->setFixedSize(600, 500);
+    
+    // 设置存档管理器居中显示
+    QScreen* screen = QApplication::primaryScreen();
+    if (screen) {
+        QRect screenGeometry = screen->geometry();
+        int x = (screenGeometry.width() - 600) / 2;
+        int y = (screenGeometry.height() - 500) / 2;
+        m_saveManager->move(x, y);
+    }
+    
+    // 设置存档管理器为可调整大小
+    m_saveManager->setWindowFlags(Qt::Window | Qt::WindowStaysOnTopHint | Qt::WindowCloseButtonHint);
+}
+
+GameSaveData PuzzleGame::createCurrentGameData()
+{
+    GameSaveData data;
+    data.saveName = "";
+    data.saveTime = QDateTime::currentDateTime();
+    data.imagePath = m_filename.isEmpty() ? ":/examples/ex0" : m_filename; // 确保有默认图片路径
+    data.rows = m_rows;
+    data.cols = m_cols;
+    data.numberOfPieces = m_numberOfPieces;
+    data.typeOfPiece = m_typeOfPiece;
+    data.rotationAllowed = m_rotationAllowed;
+    data.gameTime = m_gameTime;
+    data.moveCount = m_moveCount;
+    data.gameStarted = m_gameStarted;
+    
+    // 保存所有碎片的状态
+    for (PuzzlePiece* piece : m_puzzlePieces) {
+        PuzzlePieceSaveData pieceData;
+        pieceData.id = piece->id();
+        pieceData.position = piece->originalPosition();
+        pieceData.angle = piece->angle();
+        pieceData.isFixed = false; // 暂时设为false，实际状态会在加载时重新计算
+        pieceData.mergedPieceID = -1; // 需要从合并组中获取
+        
+        data.pieces.append(pieceData);
+    }
+    
+    // 如果没有碎片数据，创建默认数据
+    if (data.pieces.isEmpty()) {
+        for (int i = 0; i < data.numberOfPieces; ++i) {
+            PuzzlePieceSaveData pieceData;
+            pieceData.id = i;
+            pieceData.position = QPointF(100 + i * 10, 100 + i * 10); // 默认位置
+            pieceData.angle = 0;
+            pieceData.isFixed = false;
+            pieceData.mergedPieceID = -1;
+            data.pieces.append(pieceData);
+        }
+    }
+    
+    // 保存合并的碎片组（将PuzzlePiece*转换为ID）
+    for (const QVector<PuzzlePiece*>& mergedGroup : m_mergedPieces) {
+        QVector<int> groupIds;
+        for (PuzzlePiece* piece : mergedGroup) {
+            groupIds.append(piece->id());
+        }
+        data.mergedPieces.append(groupIds);
+    }
+    
+    // 如果没有合并组数据，创建空数据
+    if (data.mergedPieces.isEmpty()) {
+        // 保持空，表示没有合并的碎片
+    }
+    
+    return data;
+}
+
+void PuzzleGame::loadGameFromData(const GameSaveData& gameData)
+{
+    // 停止当前游戏
+    stopGameTimer();
+    
+    // 清理当前游戏状态
+    for (PuzzlePiece* piece : m_puzzlePieces) {
+        piece->deleteLater();
+    }
+    m_puzzlePieces.clear();
+    m_mergedPieces.clear();
+    
+    if (m_grid) {
+        m_grid->deleteLater();
+        m_grid = nullptr;
+    }
+    
+    // 设置游戏参数
+    m_rows = gameData.rows;
+    m_cols = gameData.cols;
+    m_numberOfPieces = gameData.numberOfPieces;
+    m_typeOfPiece = gameData.typeOfPiece;
+    m_rotationAllowed = gameData.rotationAllowed;
+    m_gameTime = gameData.gameTime;
+    m_moveCount = gameData.moveCount;
+    m_gameStarted = gameData.gameStarted;
+    m_filename = gameData.imagePath;
+    
+    // 加载图片
+    if (!m_filename.isEmpty()) {
+        QPixmap image(m_filename);
+        if (!image.isNull()) {
+            loadImage(image);
+        } else {
+            // 如果无法加载图片，尝试从资源加载示例图片
+            QPixmap fallbackImage(":/examples/ex0");
+            if (!fallbackImage.isNull()) {
+                loadImage(fallbackImage);
+            }
+        }
+    } else {
+        // 如果没有图片文件，尝试从资源加载示例图片
+        QPixmap image(":/examples/ex0");
+        if (!image.isNull()) {
+            loadImage(image);
+        }
+    }
+    
+    // 重新创建拼图
+    if (!m_image.isNull()) {
+        // 创建网格和图片，但不放置碎片
+        m_grid = new PuzzleGrid(m_rows, m_cols, m_pieceWidth, m_pieceHeight, m_typeOfPiece, this, m_customJigsawPath);
+        setupImage();
+        generatePuzzlePieces();
+    } else {
+        // 如果图片加载失败，尝试使用默认图片重新创建拼图
+        qDebug() << "图片加载失败，尝试使用默认图片重新创建拼图";
+        QPixmap defaultImage(":/examples/ex0");
+        if (!defaultImage.isNull()) {
+            loadImage(defaultImage);
+            m_grid = new PuzzleGrid(m_rows, m_cols, m_pieceWidth, m_pieceHeight, m_typeOfPiece, this, m_customJigsawPath);
+            setupImage();
+            generatePuzzlePieces();
+        } else {
+            qDebug() << "无法加载默认图片，拼图创建失败";
+            return;
+        }
+    }
+    
+    // 恢复碎片状态（不调用placePuzzlePieces）
+    for (const PuzzlePieceSaveData& pieceData : gameData.pieces) {
+        if (pieceData.id < m_puzzlePieces.size()) {
+            PuzzlePiece* piece = m_puzzlePieces[pieceData.id];
+            piece->move(pieceData.position);
+            piece->setAngle(pieceData.angle);
+            piece->show();
+            piece->raise();
+            // 注意：isFixed 状态会在 fixPieceIfPossible 中自动处理
+        }
+    }
+    
+    // 确保所有碎片都可见
+    for (PuzzlePiece* piece : m_puzzlePieces) {
+        piece->show();
+        piece->raise();
+    }
+    
+    // 如果没有碎片数据，使用默认位置
+    if (gameData.pieces.isEmpty()) {
+        for (int i = 0; i < m_puzzlePieces.size(); ++i) {
+            PuzzlePiece* piece = m_puzzlePieces[i];
+            piece->move(100.0 + i * 10.0, 100.0 + i * 10.0);
+            piece->setAngle(0);
+            piece->show();
+            piece->raise();
+        }
+    }
+    
+    // 恢复合并的碎片组（将ID转换回PuzzlePiece*）
+    m_mergedPieces.clear();
+    for (const QVector<int>& groupIds : gameData.mergedPieces) {
+        QVector<PuzzlePiece*> group;
+        for (int id : groupIds) {
+            if (id < m_puzzlePieces.size()) {
+                group.append(m_puzzlePieces[id]);
+            }
+        }
+        if (!group.isEmpty()) {
+            m_mergedPieces.append(group);
+        }
+    }
+    
+    // 如果没有合并组数据，保持空
+    if (gameData.mergedPieces.isEmpty()) {
+        // 保持空，表示没有合并的碎片
+    }
+    
+    // 更新显示
+    updateTimeDisplay();
+    updateMovesDisplay();
+    
+    // 如果游戏已经开始且未完成，继续计时
+    if (m_gameStarted && m_mergedPieces.isEmpty()) {
+        startGameTimer();
+    } else if (m_mergedPieces.size() == 1 && m_mergedPieces[0].size() == m_numberOfPieces) {
+        // 如果游戏已完成，显示胜利界面
+        m_wonWidget->show();
+        m_wonWidget->raise();
+    } else {
+        // 如果游戏未开始，不启动计时器
+        stopGameTimer();
+    }
+}
+
+void PuzzleGame::showSaveManager()
+{
+    // 设置当前游戏数据
+    GameSaveData currentData = createCurrentGameData();
+    m_saveManager->setCurrentGameData(currentData);
+    
+    // 显示存档管理器
+    m_saveManager->show();
+    m_saveManager->raise();
+    m_saveManager->activateWindow();
+    
+    // 刷新存档列表
+    m_saveManager->refreshSaveList();
 }
