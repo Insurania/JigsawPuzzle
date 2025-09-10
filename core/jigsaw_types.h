@@ -108,12 +108,18 @@ struct Parameters {
     QFont mainFont = QFont("Georgia", 16, QFont::Bold);
 };
 
+// 全局随机数生成器，用于确保形状一致性
+extern std::mt19937 g_randomGenerator;
+
 inline int randomNumber(int min, int max) {
-    std::random_device rd;
-    std::mt19937 g(rd());
     int range = (max - min) + 1;
-    int result = (g() % range) + min;
+    int result = (g_randomGenerator() % range) + min;
     return result;
+}
+
+// 设置随机数生成器的种子
+inline void setRandomSeed(unsigned int seed) {
+    g_randomGenerator.seed(seed);
 }
 
 }

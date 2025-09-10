@@ -42,6 +42,7 @@ struct GameSaveData {
     int gameTime;              // 游戏时间（秒）
     int moveCount;             // 移动步数
     bool gameStarted;          // 游戏是否已开始
+    unsigned int randomSeed;   // 随机种子，用于确保形状一致性
     QVector<PuzzlePieceSaveData> pieces; // 碎片数据
     QVector<QVector<int>> mergedPieces;  // 合并的碎片组
     

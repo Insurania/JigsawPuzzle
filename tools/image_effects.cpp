@@ -35,8 +35,15 @@ void ImageEffects::run()
     }
 
     m_targetSize = m_target->size();
-    m_source = m_source.scaled(m_targetSize, Qt::KeepAspectRatio);
+    // 限制图片最大尺寸为目标的50%，避免图片过大
+    QSize maxSize = m_targetSize * 0.5;
+    m_source = m_source.scaled(maxSize, Qt::KeepAspectRatio);
     m_scaledSourceSize = m_source.size();
+    
+    // 调试信息
+    qDebug() << "ImageEffects - Target size:" << m_targetSize;
+    qDebug() << "ImageEffects - Max size:" << maxSize;
+    qDebug() << "ImageEffects - Scaled source size:" << m_scaledSourceSize;
     m_startingPoint = QPoint((m_targetSize.width() - m_scaledSourceSize.width()) / 2, (m_targetSize.height() - m_scaledSourceSize.height()) / 2);
     m_counter = 0;
     m_percentagPerTimeout = 1.0 * TIMEOUTMSECS / m_duration;

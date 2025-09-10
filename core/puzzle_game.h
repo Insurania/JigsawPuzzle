@@ -51,6 +51,7 @@ private:
     QPixmap m_image;
     Jigsaw::TypeOfPiece m_typeOfPiece;
     CustomPuzzlePath m_customJigsawPath;
+    unsigned int m_randomSeed;  // 随机种子，用于确保形状一致性
 
     int m_pieceWidth;
     int m_pieceHeight;
@@ -116,6 +117,7 @@ private:
     int m_gameTime;
     int m_moveCount;
     bool m_gameStarted;  // 游戏是否已经开始
+    bool m_gameWon;      // 游戏是否已经胜利
     
     void setupStatsWidget();
     void updateTimeDisplay();

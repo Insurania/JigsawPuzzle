@@ -48,6 +48,7 @@ QJsonObject GameSaveData::toJson() const
     obj["gameTime"] = gameTime;
     obj["moveCount"] = moveCount;
     obj["gameStarted"] = gameStarted;
+    obj["randomSeed"] = static_cast<int>(randomSeed);
     
     // 保存碎片数据
     QJsonArray piecesArray;
@@ -84,6 +85,7 @@ GameSaveData GameSaveData::fromJson(const QJsonObject& json)
     data.gameTime = json["gameTime"].toInt();
     data.moveCount = json["moveCount"].toInt();
     data.gameStarted = json["gameStarted"].toBool();
+    data.randomSeed = json["randomSeed"].toInt();
     
     // 加载碎片数据
     QJsonArray piecesArray = json["pieces"].toArray();
